@@ -1,14 +1,19 @@
 // 存储副作用函数的桶
 const bucket = new Set()
 
+// 用一个全局变量存储被注册的副作用函数
+let activeEffect;
+
 // 原始数据
 const data = { text: 'hello world' }
 
-// 定义副作用函数
-const effect = () => {
+// effect 函数用于注册副作用函数
+const effect = (fn) => {
+  // 当调用 effect 注册副作用函数时，将副作用函数 fn 赋值给 activeEffect
   debugger;
-  document.body.innerText = obj.text
-  console.log(`Data changed: ${obj.text}`);
+  activeEffect = fn
+  // 执行副作用函数
+  fn()
 }
 
 // 对原始数据的代理
@@ -17,7 +22,7 @@ const obj = new Proxy(data, {
   get(target, key) {
     debugger;
     // 将副作用函数 effect 添加到存储副作用函数的桶中
-    bucket.add(effect)
+    bucket.add(activeEffect)
     // 返回属性值
     return target[key]
   },
@@ -33,10 +38,12 @@ const obj = new Proxy(data, {
   }
 })
 
-effect()
+effect(() => {
+  document.body.innerHTML = obj.text
+})
 
 setTimeout(() => {
-  obj.text = 'hello vue3'
+  obj.notExist = 'hello vue3'
 }, 1000)
 
 
